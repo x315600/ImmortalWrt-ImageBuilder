@@ -20,30 +20,71 @@ EOF
 echo "cat pppoe-settings"
 cat /home/build/immortalwrt/files/etc/config/pppoe-settings
 
+# 下载 run 文件仓库
+echo "🔄 Cloning run file repo..."
+git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store-run-repo
+
+# 拷贝 run/arm64 下所有 run 文件和ipk文件 到 extra-packages 目录
+mkdir -p /home/build/immortalwrt/extra-packages
+cp -r /tmp/store-run-repo/run/arm64/* /home/build/immortalwrt/extra-packages/
+
+echo "✅ Run files copied to extra-packages:"
+ls -lh /home/build/immortalwrt/extra-packages/*.run
+# 解压并拷贝ipk到packages目录
+sh prepare-packages.sh
+ls -lah /home/build/immortalwrt/packages/
+# 添加架构优先级信息
+sed -i '1i\
+arch aarch64_generic 10\n\
+arch aarch64_cortex-a53 15' repositories.conf
+
 # 输出调试信息
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting build process..."
-
-
+echo "$(date '+%Y-%m-%d %H:%M:%S') - 开始构建固件..."
+echo "查看repositories.conf信息——————"
+cat repositories.conf
 # 定义所需安装的包列表 下列插件你都可以自行删减
 PACKAGES=""
 PACKAGES="$PACKAGES curl"
+PACKAGES="$PACKAGES openssh-sftp-server"
 PACKAGES="$PACKAGES luci-i18n-diskman-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-package-manager-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn"
-# 服务——FileBrowser 用户名admin 密码admin
-PACKAGES="$PACKAGES luci-i18n-filebrowser-go-zh-cn"
 PACKAGES="$PACKAGES luci-app-argon-config"
 PACKAGES="$PACKAGES luci-i18n-argon-config-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-ttyd-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-passwall-zh-cn"
 PACKAGES="$PACKAGES luci-app-openclash"
 PACKAGES="$PACKAGES luci-i18n-homeproxy-zh-cn"
-PACKAGES="$PACKAGES openssh-sftp-server"
+# docker
 PACKAGES="$PACKAGES luci-i18n-dockerman-zh-cn"
-# 增加几个必备组件 方便用户安装iStore
-PACKAGES="$PACKAGES fdisk"
-PACKAGES="$PACKAGES script-utils"
-PACKAGES="$PACKAGES luci-i18n-samba4-zh-cn"
+# 文件管理器
+PACKAGES="$PACKAGES luci-i18n-filemanager-zh-cn"
+# 静态文件服务器dufs(推荐)
+PACKAGES="$PACKAGES luci-i18n-dufs-zh-cn"
+
+# ============= imm仓库外的第三方插件===============
+# ===== 若启用 请打开PACKAGES前面的注释==============
+# istore商店
+PACKAGES="$PACKAGES luci-app-store"
+# 首页和网络向导
+PACKAGES="$PACKAGES luci-i18n-quickstart-zh-cn"
+# 去广告adghome
+PACKAGES="$PACKAGES luci-app-adguardhome"
+# 代理相关
+PACKAGES="$PACKAGES luci-app-ssr-plus"
+PACKAGES="$PACKAGES luci-app-passwall2"
+PACKAGES="$PACKAGES luci-i18n-nikki-zh-cn"
+# VPN
+PACKAGES="$PACKAGES luci-app-tailscale"
+PACKAGES="$PACKAGES luci-i18n-tailscale-zh-cn"
+# 分区扩容 by sirpdboy 
+PACKAGES="$PACKAGES luci-app-partexp"
+PACKAGES="$PACKAGES luci-i18n-partexp-zh-cn"
+# 酷猫主题 by sirpdboy 
+PACKAGES="$PACKAGES luci-theme-kucat"
+# 网络测速 by sirpdboy 
+PACKAGES="$PACKAGES luci-app-netspeedtest"
+PACKAGES="$PACKAGES luci-i18n-netspeedtest-zh-cn"
 
 # 构建镜像
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
