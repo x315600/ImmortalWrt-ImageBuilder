@@ -15,10 +15,10 @@
 > 8、新增第三方软件包的集成功能
 
 
-## 如何查询都有哪些插件?
-https://mirrors.sjtug.sjtu.edu.cn/immortalwrt/releases/23.05.4/packages/aarch64_cortex-a53/luci/ <br>
-https://mirrors.sjtug.sjtu.edu.cn/immortalwrt/releases/23.05.4/packages/x86_64/luci/ 
-
+## 如何查询imm仓库内有哪些插件
+https://mirrors.sjtug.sjtu.edu.cn/immortalwrt/releases/24.10.2/packages/x86_64/luci/
+## 如何查询imm仓库外目前可以集成哪些插件
+https://github.com/wukongdaily/store/tree/master/run
 
 ## 旁路由的用户必读
 近期不少用户修改配置文件中的默认ip地址，误认为这个工作流可以直接设置旁路ip。这是巨大的误解，这样设置就乱套了。<br>
