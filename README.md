@@ -19,6 +19,8 @@
 https://mirrors.sjtug.sjtu.edu.cn/immortalwrt/releases/24.10.2/packages/x86_64/luci/
 ## 如何查询imm仓库外目前可以集成哪些插件
 https://github.com/wukongdaily/store/tree/master/run
+## 第三方插件集成的原理详见以下视频
+https://www.youtube.com/watch?v=7i6BQeitUtE
 
 ## 旁路由的用户必读
 近期不少用户修改配置文件中的默认ip地址，误认为这个工作流可以直接设置旁路ip。这是巨大的误解，这样设置就乱套了。<br>
@@ -54,6 +56,7 @@ https://wkdaily.cpolar.cn/15
 # 🌟鸣谢
 ### https://github.com/immortalwrt
 ### https://github.com/sirpdboy
+### https://github.com/wukongdaily/ib-overlay
 
 ## ❤️赞助作者 ⬇️⬇️
 
