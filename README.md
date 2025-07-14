@@ -12,13 +12,14 @@
 > 5、新增全志平台R1S、香橙派Zero3等机型的工作流<br>
 > 6、新增用户预设置pppoe拨号功能<br>
 > 7、新增树莓派①②③④⑤<br>
-> 8、新增第三方软件包的集成功能
+> 8、新增第三方软件包的集成功能 https://github.com/wukongdaily/AutoBuildImmortalWrt/discussions/209
 
 
 ## 如何查询imm仓库内有哪些插件
 https://mirrors.sjtug.sjtu.edu.cn/immortalwrt/releases/24.10.2/packages/x86_64/luci/
 ## 如何查询imm仓库外目前可以集成哪些插件
 https://github.com/wukongdaily/store/tree/master/run
+> 具体方法 https://github.com/wukongdaily/AutoBuildImmortalWrt/discussions/209
 ## 第三方插件集成的原理详见以下视频
 https://www.youtube.com/watch?v=7i6BQeitUtE
 
