@@ -119,7 +119,7 @@ jobs:
         uses: softprops/action-gh-release@v2.2.1
         with:
           tag_name: "Custom-Installer-x86_64-ISO"
-          body_path: "${{ github.workspace }}/img-installer/supportFiles/custom/info.md"
+          body_path: "${{ github.workspace }}/img-installer/autobuild/info.md"
           files: |
             img-installer/output/custom-installer-x86_64.iso
           token: "${{ secrets.GITHUB_TOKEN }}"
