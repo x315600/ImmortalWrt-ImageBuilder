@@ -34,13 +34,9 @@ on:
         options:
           - '1024'
 
-
-      
-
 jobs:
   build:
     runs-on: ubuntu-22.04
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -94,7 +90,7 @@ jobs:
           fi
           echo "file=$ROOTFS_FILE" >> $GITHUB_OUTPUT
 
-       - name: Package armsr-armv8 as ImmortalWrt for N1
+      - name: Package armsr-armv8 as ImmortalWrt for N1
         uses: ophub/flippy-openwrt-actions@main
         if: ${{ steps.down.outputs.status }} == 'success' && !cancelled()
         env:
