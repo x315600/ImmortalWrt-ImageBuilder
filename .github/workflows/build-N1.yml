@@ -103,7 +103,8 @@ jobs:
           echo "Image file is: $FILE"
           FILENAME=$(basename "$FILE")
           echo "FILENAME=$FILENAME" >> $GITHUB_ENV
-          mv "$FILE" "${{ env.PACKAGED_OUTPUTPATH }}/immortalwrt-24.10.2-phicomm-n1-squashfs-sysupgrade.img.gz"
+          KERNEL_VERSION=$(echo "$FILENAME" | grep -oP 'k\d+\.\d+\.\d+')
+          mv "$FILE" "${{ env.PACKAGED_OUTPUTPATH }}/immortalwrt-24.10.2-phicomm-n1-ext4-$KERNEL_VERSION.img.gz"
 
 
       - name: Upload firmware to GitHub Releases
@@ -114,5 +115,6 @@ jobs:
           body_path: ${{ github.workspace }}/n1/info.md
           files: |
             ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz
+            ${{ github.workspace }}/bin/targets/armsr/armv8/*rootfs.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
