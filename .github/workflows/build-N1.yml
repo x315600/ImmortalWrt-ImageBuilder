@@ -22,7 +22,7 @@ on:
           - 'yes'
           - 'no'
       replace_banner:
-        description: '是否替换为ImmortalWrt的banner信息'
+        description: '替换为ImmortalWrt的banner信息'
         required: false
         default: false
         type: boolean
