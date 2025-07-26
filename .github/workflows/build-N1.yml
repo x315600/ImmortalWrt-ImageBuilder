@@ -92,6 +92,7 @@ jobs:
         with:
           openwrt_path: ${{ steps.find_rootfs.outputs.file }}
           openwrt_board: s905d
+          openwrt_size: "256/${{ github.event.inputs.rootfs_partsize }}"
           openwrt_kernel: ${{ inputs.openwrt_kernel }}
           builder_name: "wukongdaily"
           auto_kernel: true
