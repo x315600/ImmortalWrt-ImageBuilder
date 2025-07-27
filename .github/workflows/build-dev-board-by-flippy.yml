@@ -169,7 +169,7 @@ jobs:
         uses: softprops/action-gh-release@v2.2.1
         with:
           tag_name: flippy
-          name: ImmortalWrt for Radxa etc using flippy
+          name: ImmortalWrt for Radxa Series and Similar Devices
           body_path: ${{ github.workspace }}/n1/radxa.md
           files: |
             ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz
