@@ -68,14 +68,6 @@ jobs:
               immortalwrt/imagebuilder:sunxi-cortexa53-openwrt-23.05.4 /bin/bash /home/build/immortalwrt/build.sh
           done
 
-      - name: Generate Firmware SHA-256
-        run: |
-          cp ${{ github.workspace }}/bin/targets/sunxi/cortexa53/*squashfs-sdcard.img.gz ${{ github.workspace }}
-          for file in *.img.gz; do
-            sha256sum "$file" > "$file.sha256"
-            sha256sum -c "$file.sha256"
-          done
-
       - name: Create info
         run: |
           if [ "${{ github.event.inputs.include_docker }}" == "yes" ]; then
@@ -92,8 +84,7 @@ jobs:
           name: ImmortalWrt-sunxi-cortexa53
           body_path: ${{ github.workspace }}/sunxi-cortexa53/info.md
           files: |
-            ${{ github.workspace }}/*.img.gz
-            ${{ github.workspace }}/*.sha256
+            ${{ github.workspace }}/bin/targets/sunxi/cortexa53/*squashfs-sdcard.img.gz 
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
