@@ -86,9 +86,6 @@
 | sunxi-cortexa53       | pine64_pine64-plus          | Pine64        | A64            | 24.10.x    |
 | sunxi-cortexa53       | pine64_sopine-baseboard     | Pine64        | A64            | 24.10.x    |
 
-> ### 斐讯N1 电视盒子
-> 这比较特殊 是二次打包的 构建的是armsr-armv8的rootfs Flippy打包工具打包为OpenWrt镜像
-> 用户基数比较庞大 所以我是单独一个工作流 支持根据具体内核版本来构建
 
 
 > ### GL-iNet 和 Cudy MediaTek Filogic 工作流
@@ -107,16 +104,16 @@
 
 | 📦 启动方式 / 分类            | 型号       | 厂商      | 处理器/芯片组        | 说明          |
 | ----------------------- | -------- | ------- | -------------- | ----------- |
-| Flippy兼容设备（armsr-armv8） | e20c     | Radxa   | RK3528A (推测)    | 需Flippy工具打包 |
-| Flippy兼容设备（armsr-armv8） | e24c     | Radxa   | RK3528A?        | 需Flippy工具打包 |
+| Flippy兼容设备（armsr-armv8） | e20c     | Radxa   | RK3528A     | 需Flippy工具打包 |
+| Flippy兼容设备（armsr-armv8） | e24c     | Radxa   | RK3528A        | 需Flippy工具打包 |
 | Flippy兼容设备（armsr-armv8） | e25      | Radxa   | RK3568        | OpenWrt官方支持/Flippy工具打包 |
-| Flippy兼容设备（armsr-armv8） | e52c     | 未明确     | RK3582        | 需Flippy工具打包 |
-| Flippy兼容设备（armsr-armv8） | e54c     | 未明确     | RK3582        | 需Flippy工具打包 |
+| Flippy兼容设备（armsr-armv8） | e52c     | Radxa     | RK3582        | 需Flippy工具打包 |
+| Flippy兼容设备（armsr-armv8） | e54c     | Radxa     | RK3582        | 需Flippy工具打包 |
 | Flippy兼容设备（armsr-armv8） | rock5b   | Radxa   | RK3588         | 高性能SBC      |
 | Flippy兼容设备（armsr-armv8） | rock5c   | Radxa   | RK3588S        | 紧凑型版本       |
-| Flippy兼容设备（armsr-armv8） | r66s     | Lunzn   | RK3568         | 工业路由器       |
-| Flippy兼容设备（armsr-armv8） | r68s     | Lunzn   | RK3568         | 工业路由器       |
-| Flippy兼容设备（armsr-armv8） | ht2      | 未明确     | RK3328?        | TV盒子类       |
+| Flippy兼容设备（armsr-armv8） | r66s     | Lunzn   | RK3568         | OpenWrt官方支持/lunzn_fastrhino-r66s        |
+| Flippy兼容设备（armsr-armv8） | r68s     | Lunzn   | RK3568         | OpenWrt官方支持/lunzn_fastrhino-r68s         |
+| Flippy兼容设备（armsr-armv8） | ht2      | 未明确     | RK3328       | TV盒子类       |
 | Flippy兼容设备（armsr-armv8） | h28k     | HINLINK | Amlogic S905X3 | 电视盒子        |
 | Flippy兼容设备（armsr-armv8） | h66k     | HINLINK | Amlogic S922X  |             |
 | Flippy兼容设备（armsr-armv8） | h68k     | HINLINK | Amlogic S922X  |             |
@@ -133,3 +130,6 @@
 | Flippy兼容设备（armsr-armv8） | s922x    | 多厂商     | Amlogic S922X  | Odroid N2芯片 |
 | Flippy兼容设备（armsr-armv8） | s922x-n2 | Odroid  | Amlogic S922X  | 高兼容性设备      |
 
+> ### 斐讯N1 电视盒子
+> 构建的是armsr-armv8的rootfs Flippy打包工具打包为OpenWrt镜像<br>
+> 用户基数比较庞大 所以我是单独一个工作流 build-n1.yml 支持根据具体 特定内核版本来构建
