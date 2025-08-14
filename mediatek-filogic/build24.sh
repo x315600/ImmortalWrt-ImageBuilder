@@ -26,13 +26,6 @@ arch aarch64_cortex-a53 15' repositories.conf
 # yml 传入的路由器型号 PROFILE
 echo "Building for profile: $PROFILE"
 
-if [ "$PROFILE" = "glinet_gl-axt1800" ] || [ "$PROFILE" = "glinet_gl-ax1800" ]; then
-    # 这2款 暂时不支持第三方插件的集成
-    rm shell/custom-packages.sh
-else
-    echo "Other Model:$PROFILE"
-fi
-
 echo "Include Docker: $INCLUDE_DOCKER"
 echo "Create pppoe-settings"
 mkdir -p  /home/build/immortalwrt/files/etc/config
@@ -70,8 +63,13 @@ PACKAGES="$PACKAGES luci-i18n-dufs-zh-cn"
 
 # 第三方软件包 合并
 # ======== shell/custom-packages.sh =======
-PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
-
+if [ "$PROFILE" = "glinet_gl-axt1800" ] || [ "$PROFILE" = "glinet_gl-ax1800" ]; then
+    # 这2款 暂时不支持第三方插件的集成
+    echo "Model:$PROFILE not support third-parted packages"
+else
+    echo "Other Model:$PROFILE"
+    PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
+fi
 
 # 判断是否需要编译 Docker 插件
 if [ "$INCLUDE_DOCKER" = "yes" ]; then
