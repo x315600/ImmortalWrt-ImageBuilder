@@ -86,7 +86,7 @@ jobs:
       - name: Create info
         run: |
           cat > router-info.md <<EOF
-          # 📡 路由器后台信息
+          ## 📡 路由器后台信息
 
           - 🏠 **后台地址**: ${{ github.event.inputs.custom_router_ip }}
           - 👤 **用户名**: root
