@@ -46,7 +46,7 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - Starting build process..."
 
 # 定义所需安装的包列表 下列插件你都可以自行删减
 PACKAGES=""
-PACKAGES="$PACKAGES curl"
+PACKAGES="$PACKAGES curl luci luci-i18n-base-zh-cn"
 PACKAGES="$PACKAGES luci-i18n-firewall-zh-cn"
 PACKAGES="$PACKAGES luci-theme-argon"
 PACKAGES="$PACKAGES luci-app-argon-config"
@@ -64,8 +64,9 @@ PACKAGES="$PACKAGES luci-i18n-dufs-zh-cn"
 # 第三方软件包 合并
 # ======== shell/custom-packages.sh =======
 if [ "$PROFILE" = "glinet_gl-axt1800" ] || [ "$PROFILE" = "glinet_gl-ax1800" ]; then
-    # 这2款 暂时不支持第三方插件的集成
+    # 这2款 暂时不支持第三方插件的集成 snapshot版本太高 opkg换成apk包管理器 6.12内核 
     echo "Model:$PROFILE not support third-parted packages"
+    PACKAGES="$PACKAGES -luci-i18n-diskman-zh-cn luci-i18n-homeproxy-zh-cn"
 else
     echo "Other Model:$PROFILE"
     PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
