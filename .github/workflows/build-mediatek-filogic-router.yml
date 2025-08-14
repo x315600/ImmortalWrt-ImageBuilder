@@ -12,9 +12,12 @@ on:
           - glinet_gl-mt2500
           - glinet_gl-mt3000
           - glinet_gl-mt6000
+          - glinet_gl-axt1800
+          - glinet_gl-ax1800
           - glinet_gl-b2200
           - glinet_gl-x3000
           - glinet_gl-xe3000
+          - huasifei_wh3000-emmc  # 就是Fudy MT3000
           - cudy_tr3000-v1
           - cudy_tr3000-v1-ubootmod
           - cudy_tr3000-256mb-v1
@@ -64,7 +67,6 @@ on:
           - gatonetworks_gdsp
           - h3c_magic-nx30-pro
           - h3c_magic-nx30-pro-nmbm
-          - huasifei_wh3000-emmc
           - imou_lc-hx3001
           - keenetic_kn-3811
           - keenetic_kn-3911
@@ -188,6 +190,11 @@ jobs:
                   # 虽然它是高通平台 但由于都是gl机型 故放在一起 找起来方便
                   tag=ipq40xx-generic-openwrt-24.10.2
                   echo "platform=ipq40xx/generic" >> $GITHUB_ENV
+                  ;;
+              glinet_gl-axt1800|glinet_gl-ax1800)
+                  # 虽然它是高通平台 但由于都是gl机型 故放在一起 找起来方便
+                  tag=qualcommax-ipq60xx-snapshot
+                  echo "platform=qualcommax/ipq60xx" >> $GITHUB_ENV
                   ;;
               cudy_tr3000-256mb-v1)
                   # 由于256MB版本tr3000 还没有出正式版24.10.2 故使用快照版本来构建
