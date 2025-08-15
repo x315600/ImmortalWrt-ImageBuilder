@@ -1,4 +1,20 @@
 # 此工作流99% 使用luci 24.10.x 来构建 极个别机型使用快照版和23.05.4版本来构建
+# 23.05.4 特有机型列表
+# abt_asr3000-ubootmod
+# cetron_ct3003-stock
+# cmcc_a10
+# cmcc_rax3000m-emmc-ubootmod
+# cmcc_rax3000m-nand-ubootmod
+# imou_lc-hx3001-ubootmod
+# jcg_q30 捷成
+# jcg_q30-ubootmod
+# qihoo_360t7-ubootmod
+# xiaomi_mi-router-wr30u-112m-nmbm
+# xiaomi_redmi-router-ax6000 该机型在24.10.2 分化为2个机型
+# —————————————————————————————24.10.2—————————————————————————————————
+# xiaomi_redmi-router-ax6000-stock ————原厂默认 bootloader（stock）版本
+# xiaomi_redmi-router-ax6000-ubootmod—————改装过 bootloader 的版本（ubootmod）
+
 name: Build MTK Router ImmortalWrt 24.10.x
 
 on:
@@ -17,16 +33,22 @@ on:
           - glinet_gl-b2200
           - glinet_gl-x3000
           - glinet_gl-xe3000
-          - huasifei_wh3000-emmc  # 就是Fudy MT3000
+          # 就是Fudy MT3000
+          - huasifei_wh3000-emmc
           - cudy_tr3000-v1
           - cudy_tr3000-v1-ubootmod
           - cudy_tr3000-256mb-v1
           - jcg_q30-pro
+          - jcg_q30
+          - jcg_q30-ubootmod
+          # 京东云AX6000百里
           - jdcloud_re-cp-03
           - xiaomi_mi-router-ax3000t
           - xiaomi_mi-router-ax3000t-ubootmod
           - xiaomi_mi-router-wr30u-stock
           - xiaomi_mi-router-wr30u-ubootmod
+          - xiaomi_mi-router-wr30u-112m-nmbm
+          - xiaomi_redmi-router-ax6000
           - xiaomi_redmi-router-ax6000-stock
           - xiaomi_redmi-router-ax6000-ubootmod
           - cmcc_a10-stock
@@ -35,7 +57,14 @@ on:
           - cmcc_rax3000me
           - cmcc_rax3000m-emmc-ubootmod
           - cmcc_rax3000m-nand-ubootmod
+          - imou_lc-hx3001-ubootmod
+          - qihoo_360t7-ubootmod
+          - xiaomi_mi-router-wr30u-112m-nmbm
+          - xiaomi_redmi-router-ax6000
           - abt_asr3000
+          - abt_asr3000-ubootmod
+          - cetron_ct3003-stock
+          - cmcc_a10
           - acelink_ew-7886cax
           - acer_predator-w6
           - acer_predator-w6d
@@ -183,31 +212,41 @@ jobs:
           echo "Building for profile: $profile"
           include_docker="${{ github.event.inputs.include_docker }}"
           echo "platform=mediatek/filogic" >> $GITHUB_ENV
-
           # 判断机型
           case "$profile" in
               glinet_gl-b2200)
-                  # 虽然它是高通平台 但由于都是gl机型 故放在一起 找起来方便
+              # 虽然它是高通ipq40xx平台 但由于都是gl机型 故放在一起 找起来方便
                   tag=ipq40xx-generic-openwrt-24.10.2
                   echo "platform=ipq40xx/generic" >> $GITHUB_ENV
                   ;;
               glinet_gl-axt1800|glinet_gl-ax1800)
-                  # 虽然它是高通平台 但由于都是gl机型 故放在一起 找起来方便
+              # 虽然它是高通ipq60xx平台 但由于都是gl机型 故放在一起 找起来方便
                   tag=qualcommax-ipq60xx-snapshot
                   echo "platform=qualcommax/ipq60xx" >> $GITHUB_ENV
                   ;;
               cudy_tr3000-256mb-v1)
-                  # 由于256MB版本tr3000 还没有出正式版24.10.2 故使用快照版本来构建
+              # 由于256MB版本tr3000 还没有出正式版24.10.2 故使用快照版本来构建
                   tag=mediatek-filogic-24.10-SNAPSHOT
                   ;;
-              cmcc_rax3000m-emmc-ubootmod|cmcc_rax3000m-nand-ubootmod)
-                  # 此机型没有24.10.2 且应该和cmcc_rax3000me应该有区别 故采用支持的23.05.4版本来构建 且脚本采用build23.sh
+              # 下列机型目前没有24.10 因此采用23.05.4分支来构建
+              cmcc_rax3000m-emmc-ubootmod | \
+              cmcc_rax3000m-nand-ubootmod | \
+              cmcc_a10 | \
+              abt_asr3000-ubootmod | \
+              imou_lc-hx3001-ubootmod | \
+              jcg_q30 | \
+              jcg_q30-ubootmod | \
+              xiaomi_mi-router-wr30u-112m-nmbm | \
+              cetron_ct3003-stock | \
+              xiaomi_redmi-router-ax6000 | \
+              qihoo_360t7-ubootmod)
+   
                   tag=mediatek-filogic-openwrt-23.05.4
                   ls ${{ github.workspace }}/mediatek-filogic/
                   cp ${{ github.workspace }}/mediatek-filogic/build23.sh ${{ github.workspace }}/mediatek-filogic/build24.sh
                   ;;
               *)
-                  tag=mediatek-filogic-openwrt-24.10.2
+                  tag=mediatek-filogic-openwrt-24.10.2 #默认大部分机型采用此分支构建
                   ;;
             esac
 
@@ -250,6 +289,7 @@ jobs:
             ${{ github.workspace }}/bin/targets/${{ env.platform }}/*.bin
             ${{ github.workspace }}/bin/targets/${{ env.platform }}/*.itb
             ${{ github.workspace }}/bin/targets/${{ env.platform }}/*.ubi
+            ${{ github.workspace }}/bin/targets/${{ env.platform }}/*.fip
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
