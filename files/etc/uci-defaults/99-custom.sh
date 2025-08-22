@@ -93,11 +93,21 @@ elif [ "$count" -gt 1 ]; then
         echo "Updated br-lan ports: $lan_ifnames" >>$LOGFILE
     fi
 
-    # LAN静态IP设置
+    # LAN口设置静态IP
     uci set network.lan.proto='static'
-    uci set network.lan.ipaddr='192.168.100.1'
+    # 多网口设备 支持修改为别的管理后台地址 在Github Action 的UI上自行输入即可 
     uci set network.lan.netmask='255.255.255.0'
-    echo "Set LAN IP to 192.168.100.1" >>$LOGFILE
+    # 设置路由器管理后台地址
+    IP_VALUE_FILE="/etc/config/custom_router_ip.txt"
+    if [ -f "$IP_VALUE_FILE" ]; then
+        CUSTOM_IP=$(cat "$IP_VALUE_FILE")
+        # 用户在UI上设置的路由器后台管理地址
+        uci set network.lan.ipaddr=$CUSTOM_IP
+        echo "custom router ip is $CUSTOM_IP" >> $LOGFILE
+    else
+        uci set network.lan.ipaddr='192.168.100.1'
+        echo "default router ip is 192.168.100.1" >> $LOGFILE
+    fi
 
     # PPPoE设置
     echo "enable_pppoe value: $enable_pppoe" >>$LOGFILE
