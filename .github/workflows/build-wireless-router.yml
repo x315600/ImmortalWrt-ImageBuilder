@@ -608,6 +608,7 @@ jobs:
                   ;;
               xiaomi_redmi-router-ax6s)
                   tag=mediatek-mt7622-openwrt-24.10.2
+                  echo "platform=mediatek/mt7622" >> $GITHUB_ENV
                   ;;
               # 下列机型目前没有24.10 因此采用23.05.4分支来构建
               cmcc_rax3000m-emmc-ubootmod | \
