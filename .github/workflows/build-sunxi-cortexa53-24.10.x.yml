@@ -1,4 +1,4 @@
-name: build-sunxi-cortexa53-24.10.2
+name: build-sunxi-cortexa53-24.10.x
 
 on:
   workflow_dispatch:
