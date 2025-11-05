@@ -116,7 +116,8 @@ jobs:
           name: ImmortWrt-QEMU-armsr-armv8-24.10.x
           body_path: ${{ github.workspace }}/armsr-armv8/info.md
           files: |
-            ${{ github.workspace }}/*.qcow2
+            ${{ github.workspace }}/*.qcow2 
+            ${{ github.workspace }}/*squashfs-combined-efi.img.gz
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
