@@ -108,7 +108,7 @@ jobs:
       - name: Copy Firmware to workspace
         run: |
           cp ${{ github.workspace }}/bin/targets/armsr/armv8/*.qcow2 ${{ github.workspace }}
-          cp ${{ github.workspace }}/bin/targets/armsr/armv8/*.img.gz ${{ github.workspace }}
+          cp ${{ github.workspace }}/bin/targets/armsr/armv8/*.vmdk ${{ github.workspace }}
 
       - name: Upload ImmortWrt as release assets
         uses: softprops/action-gh-release@v2.2.1
@@ -118,7 +118,7 @@ jobs:
           body_path: ${{ github.workspace }}/armsr-armv8/info.md
           files: |
             ${{ github.workspace }}/*.qcow2 
-            ${{ github.workspace }}/*squashfs-combined-efi.img.gz
+            ${{ github.workspace }}/*.vmdk
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
