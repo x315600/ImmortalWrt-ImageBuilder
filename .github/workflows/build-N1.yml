@@ -230,7 +230,7 @@ jobs:
       - name: 查找rootfs.tar.gz所在路径
         id: find_rootfs
         run: |
-          ROOTFS_FILE=$(find bin/targets/armsr/armv8/ -type f -name "-rootfs.tar.gz" | head -n1)
+          ROOTFS_FILE=$(find bin/targets/armsr/armv8/ -type f -name "*rootfs.tar.gz" | head -n1)
           echo "✅ Found: $ROOTFS_FILE"
           if [ ! -f "$ROOTFS_FILE" ]; then
             echo "❌ 找不到 rootfs.tar.gz 文件"
@@ -251,7 +251,7 @@ jobs:
       - name: Rename .img.gz file
         id: rename
         run: |
-          FILE=$(ls ${{ env.PACKAGED_OUTPUTPATH }}/-.img.gz | head -n1)
+          FILE=$(ls ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz | head -n1)
           echo "Image file is: $FILE"
           FILENAME=$(basename "$FILE")
           echo "FILENAME=$FILENAME" >> $GITHUB_ENV
@@ -273,6 +273,6 @@ jobs:
           name: ImmortalWrt for Phicomm N1
           body_path: ${{ github.workspace }}/n1/info.md
           files: |
-            ${{ env.PACKAGED_OUTPUTPATH }}/-.img.gz
+            ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
