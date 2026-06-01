@@ -3,9 +3,12 @@
 
 **⚠️ 重要声明**
 
-> **本项目与 ImmortalWRT 官方无任何关联，所有问题请勿在 ImmortalWRT 群反馈。**  
-> **如遇到问题，请前往本项目 [GitHub Discussions](https://github.com/wukongdaily/ImmortalWrt-ImageBuilder/discussions) 反馈：**  
-> **本项目纯自愿使用，使用即表示您已理解并自行承担所有风险。**
+> **本项目为个人独立维护的第三方项目(脚本)，与 ImmortalWrt 官方没有关联。** <br>
+> **项目中使用了 ImmortalWrt 官方 ImageBuilder 工具打包生成固件。<br>
+> 但用户自行定制产生的任何 bug，均不代表 ImmortalWrt 官方固件的 bug**<br>
+> **为了不给 ImmortalWrt 上游维护者增加额外负担和麻烦，所有相关问题请勿在 ImmortalWrt 群内反馈**。  <br>
+> **建议各位在本项目 [Discussions](https://github.com/wukongdaily/ImmortalWrt-ImageBuilder/discussions) 中提问或讨论**
+
 
 ---
 
