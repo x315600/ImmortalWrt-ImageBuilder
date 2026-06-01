@@ -1,9 +1,17 @@
 # [新手指导](https://github.com/wukongdaily/AutoBuildImmortalWrt/wiki) 👈🏻
 # ImmortalWrt-ImageBuilder
 
+**⚠️ 重要声明**
+
+> **本项目与 ImmortalWRT 官方无任何关联，所有问题请勿在 ImmortalWRT 群反馈。**  
+> **如遇到问题，请前往本项目 [GitHub Discussions](https://github.com/wukongdaily/ImmortalWrt-ImageBuilder/discussions) 反馈：**  
+> **本项目纯自愿使用，使用即表示您已理解并自行承担所有风险。**
+
+---
+
 [![GitHub](https://img.shields.io/github/license/wukongdaily/AutoBuildImmortalWrt.svg?label=LICENSE&logo=github&logoColor=%20)](https://github.com/wukongdaily/AutoBuildImmortalWrt/blob/master/LICENSE)
 ![GitHub Stars](https://img.shields.io/github/stars/wukongdaily/AutoBuildImmortalWrt.svg?style=flat&logo=appveyor&label=Stars&logo=github)
-![GitHub Forks](https://img.shields.io/github/forks/wukongdaily/AutoBuildImmortalWrt.svg?style=flat&logo=appveyor&label=Forks&logo=github) [![Github](https://img.shields.io/badge/RELEASE:ImmortalWrtImageBuilder-123456?logo=github&logoColor=fff&labelColor=green&style=flat)](https://github.com/wukongdaily/AutoBuildImmortalWrt/releases) [![Bilibili](https://img.shields.io/badge/Bilibili-123456?logo=bilibili&logoColor=fff&labelColor=fb7299)](https://github.com/wukongdaily/AutoBuildImmortalWrt/wiki) <br>
+![GitHub Forks](https://img.shields.io/github/forks/wukongdaily/AutoBuildImmortalWrt.svg?style=flat&logo=appveyor&label=Forks&logo=github)
 
 ## 🤔 这是什么？
 基于 CI 的 ImageBuilder 工作流，用于自动化构建 ImmortalWrt 固件。
