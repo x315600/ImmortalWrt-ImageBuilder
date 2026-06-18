@@ -1,4 +1,4 @@
-name: build-sunxi-cortexa53-25.12.x
+name: Build 25.12.x sunxi-cortexa53
 
 on:
   workflow_dispatch:
