@@ -70,12 +70,42 @@ uci add_list "$LAN_ZONE.device"='br-lan'
 uci add_list "$LAN_ZONE.device"='docker0'
 uci commit firewall
 
+
+# Preload frpc configuration only. Do not auto-start frpc.
+uci set frpc.common='conf'
+uci set frpc.common.server_addr='38.14.'
+uci set frpc.common.server_port='7000'
+uci set frpc.common.token='315600'
+
+uci set frpc.n1_web='conf'
+uci set frpc.n1_web.type='http'
+uci set frpc.n1_web.local_ip='127.0.0.1'
+uci set frpc.n1_web.local_port='80'
+uci set frpc.n1_web.custom_domains='ys.315600.xyz'
+
+uci set frpc.n1_ssh='conf'
+uci set frpc.n1_ssh.type='tcp'
+uci set frpc.n1_ssh.local_ip='127.0.0.1'
+uci set frpc.n1_ssh.local_port='22'
+uci set frpc.n1_ssh.remote_port='2222'
+uci commit frpc
+
+# Keep frpc disabled by default; user can start it manually from LuCI or SSH.
+/etc/init.d/frpc disable 2>/dev/null || true
+/etc/init.d/frpc stop 2>/dev/null || true
+
+# Reduce noisy logs for optional services.
+uci -q set mosdns.config.log_level='error'
+uci -q commit mosdns
+uci -q set bandix.general.log_level='error'
+uci -q commit bandix
+
 # Keep WebUI/SSH reachable on all interfaces.
 uci -q delete ttyd.@ttyd[0].interface
 uci set dropbear.@dropbear[0].Interface=''
 uci commit ttyd
 uci commit dropbear
 
-echo "N1 bypass router mode done: LAN=$LAN_IP gateway=$MAIN_ROUTER dns=$MAIN_ROUTER IPv6=lan6 DHCP=disabled firewall_lan=br-lan,docker0" >> "$LOGFILE"
+echo "N1 bypass router mode done: LAN=$LAN_IP gateway=$MAIN_ROUTER dns=$MAIN_ROUTER IPv6=lan6 DHCP=disabled firewall_lan=br-lan,docker0 frpc=config-only" >> "$LOGFILE"
 
 exit 0
