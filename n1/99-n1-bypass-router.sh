@@ -109,3 +109,9 @@ uci commit dropbear
 echo "N1 bypass router mode done: LAN=$LAN_IP gateway=$MAIN_ROUTER dns=$MAIN_ROUTER IPv6=lan6 DHCP=disabled firewall_lan=br-lan,docker0 frpc=config-only" >> "$LOGFILE"
 
 exit 0
+
+# Configure amlogic (晶晨宝盒) firmware repository.
+uci set amlogic.config.amlogic_firmware_repo='https://github.com/x315600/ImmortalWrt-ImageBuilder'
+uci set amlogic.config.amlogic_kernel_path='tree/master/n1'
+uci commit amlogic
+
