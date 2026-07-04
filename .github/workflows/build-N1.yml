@@ -216,6 +216,7 @@ jobs:
         if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}
         run: |
           cp n1/99-n1-bypass-router.sh files/etc/uci-defaults/
+          cp n1/99-enable-frpc.sh files/etc/uci-defaults/
       
       - name: Building N1 ImmortalWrt rootfs 24.10.x
         if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}
