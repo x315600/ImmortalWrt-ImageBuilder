@@ -35,6 +35,22 @@ PACKAGES="$PACKAGES perlbase-base perlbase-file perlbase-time perlbase-utf8 perl
 # 晶晨宝盒（追加第三方必备软件 用于写入emmc 请不要注释）
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-amlogic luci-i18n-amlogic-zh-cn"
 
+# N1 自定义插件
+# PassWall
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES geoview xray-core sing-box hysteria luci-i18n-passwall-zh-cn"
+# MosDNS
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-mosdns luci-i18n-mosdns-zh-cn"
+# OpenClash（下方会自动补充 core / GeoIP / GeoSite）
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-openclash luci-compat kmod-tun kmod-inet-diag kmod-nft-tproxy bash curl ip-full unzip"
+# Lucky
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-lucky lucky"
+# Frp client
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES frpc luci-i18n-frpc-zh-cn"
+# Nikki
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES nikki luci-app-nikki luci-i18n-nikki-zh-cn"
+# Bandix 流量监控
+CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-bandix luci-i18n-bandix-zh-cn"
+
 echo "🔄 正在同步第三方软件仓库 Cloning run file repo..."
 git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store-run-repo
 # 拷贝 run/arm64 下所有 run 文件和ipk文件 到 extra-packages 目录
