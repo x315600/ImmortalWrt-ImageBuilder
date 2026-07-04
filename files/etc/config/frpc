@@ -1,0 +1,21 @@
+config init
+	option stdout '1'
+	option stderr '1'
+	option respawn '1'
+
+config conf 'common'
+	option server_addr '38.14.254.183'
+	option server_port '7000'
+	option token '315600'
+
+config conf 'n1_web'
+	option type 'http'
+	option local_ip '127.0.0.1'
+	option local_port '80'
+	option custom_domains 'ys.315600.xyz'
+
+config conf 'n1_ssh'
+	option type 'tcp'
+	option local_ip '127.0.0.1'
+	option local_port '22'
+	option remote_port '2222'
