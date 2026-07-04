@@ -211,6 +211,11 @@ jobs:
         run: |
           # 使用ImageBuilder构建 且用户勾选了替换banner时
           cp n1/99-banner.sh files/etc/uci-defaults/
+
+      - name: Configure N1 bypass router defaults
+        if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}
+        run: |
+          cp n1/99-n1-bypass-router.sh files/etc/uci-defaults/
       
       - name: Building N1 ImmortalWrt rootfs 24.10.x
         if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}
