@@ -4,7 +4,7 @@ config init
 	option respawn '1'
 
 config conf 'common'
-	option server_addr '38.14.254.183'
+	option server_addr '38.14.'
 	option server_port '7000'
 	option token '315600'
 
