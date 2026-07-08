@@ -26,6 +26,7 @@ on:
         description: "请选择mtk路由器型号"
         required: true
         options:
+          - aliyun_ap8220
           - glinet_gl-mt3600be
           - glinet_gl-mt2500
           - glinet_gl-mt3000
