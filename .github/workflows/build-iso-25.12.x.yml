@@ -20,7 +20,7 @@ on:
         description: '选择软件包空间大小'
         required: true
         type: choice
-        default: '2G'
+        default: '1G'
         options:
           - '1G'
           - '2G'
