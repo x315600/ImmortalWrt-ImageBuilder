@@ -95,6 +95,19 @@ else
     echo "⚪️ 未选择 luci-app-openclash"
 fi
 
+# Nikki uses the shared /usr/bin/mihomo core. Keep it aligned with the
+# OpenClash Meta core because the stable package core may not support the
+# XHTTP + Reality nodes used by the default subscription profile.
+if echo "$CUSTOM_PACKAGES" | grep -q "nikki"; then
+    echo "✅ 已选择 nikki，添加兼容 XHTTP/Reality 的 mihomo core"
+    mkdir -p files/usr/bin
+    NIKKI_MIHOMO_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-arm64.tar.gz"
+    wget -qO- "$NIKKI_MIHOMO_URL" | tar xOvz > files/usr/bin/mihomo
+    chmod +x files/usr/bin/mihomo
+    echo "✅ 已下载 Nikki mihomo core"
+    files/usr/bin/mihomo -v || true
+fi
+
 if echo "$PACKAGES" | grep -q "luci-app-ssr-plus"; then
     echo "✅ 已选择 luci-app-ssr-plus，添加 mihomo core"
     mkdir -p files/usr/bin
