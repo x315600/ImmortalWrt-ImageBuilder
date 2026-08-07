@@ -97,14 +97,6 @@ uci set frpc.n1_web.local_ip='127.0.0.1'
 uci set frpc.n1_web.local_port='80'
 uci set frpc.n1_web.custom_domains='ys.315600.xyz'
 
-# This image defines one device's defaults. Multiple N1 devices need unique
-# proxy names/domains and unique remote_port values on the frps server.
-uci set frpc.n1_ssh='conf'
-uci set frpc.n1_ssh.name='n1_ssh'
-uci set frpc.n1_ssh.type='tcp'
-uci set frpc.n1_ssh.local_ip='127.0.0.1'
-uci set frpc.n1_ssh.local_port='22'
-uci set frpc.n1_ssh.remote_port='2222'
 uci commit frpc
 
 # Keep frpc disabled by default; user can start it manually from LuCI or SSH.
