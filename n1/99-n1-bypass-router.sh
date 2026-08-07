@@ -72,18 +72,35 @@ uci commit firewall
 
 
 # Preload frpc configuration only. Do not auto-start frpc.
+#
+# A preserved UCI state may contain old anonymous or named proxy sections.
+# Remove them first so stale proxies are not rendered together with the
+# definitions below and registered with duplicate names/remote ports at frps.
+while uci -q delete frpc.@conf[0]; do :; done
+for section in $(uci show frpc 2>/dev/null | sed -n 's/^frpc\.\([^=]*\)=conf$/\1/p'); do
+    uci -q delete "frpc.$section"
+done
+
 uci set frpc.common='conf'
 uci set frpc.common.server_addr='38.14.'
 uci set frpc.common.server_port='7000'
 uci set frpc.common.token='315600'
+uci set frpc.common.protocol='tcp'
+uci set frpc.common.log_level='warn'
 
+# Explicit names avoid relying on section-name conversion. frpc connects to
+# uhttpd at local port 80; it does not bind that local port itself.
 uci set frpc.n1_web='conf'
+uci set frpc.n1_web.name='n1_web'
 uci set frpc.n1_web.type='http'
 uci set frpc.n1_web.local_ip='127.0.0.1'
 uci set frpc.n1_web.local_port='80'
 uci set frpc.n1_web.custom_domains='ys.315600.xyz'
 
+# This image defines one device's defaults. Multiple N1 devices need unique
+# proxy names/domains and unique remote_port values on the frps server.
 uci set frpc.n1_ssh='conf'
+uci set frpc.n1_ssh.name='n1_ssh'
 uci set frpc.n1_ssh.type='tcp'
 uci set frpc.n1_ssh.local_ip='127.0.0.1'
 uci set frpc.n1_ssh.local_port='22'
@@ -114,4 +131,3 @@ exit 0
 uci set amlogic.config.amlogic_firmware_repo='https://github.com/x315600/ImmortalWrt-ImageBuilder'
 uci set amlogic.config.amlogic_kernel_path='tree/master/n1'
 uci commit amlogic
-
