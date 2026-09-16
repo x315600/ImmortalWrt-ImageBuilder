@@ -229,14 +229,8 @@ jobs:
             https://github.com/beck-8/subs-check/releases/download/v1.4.9/subs-check_Linux_aarch64.tar.gz
           tar -xzf /tmp/subs-check.tar.gz -C files/opt/subs-check
           chmod 0755 files/opt/subs-check/subs-check
-          if [ -z "$SUBSCRIPTION_URL" ]; then
-            echo "❌ GitHub Secret SUBSCRIPTION_URL 未设置"
-            exit 1
-          fi
-          sed -i "s|__SUBSCRIPTION_URL__|$SUBSCRIPTION_URL|g" files/opt/subs-check/data/config.yaml
+          # 故意不注入真实订阅地址；刷机后由用户手动配置。
           sha256sum files/opt/subs-check/subs-check
-        env:
-          SUBSCRIPTION_URL: ${{ secrets.SUBSCRIPTION_URL }}
 
       - name: Building N1 ImmortalWrt rootfs 24.10.x
         if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}

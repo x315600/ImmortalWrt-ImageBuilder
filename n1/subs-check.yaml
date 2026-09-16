@@ -4,5 +4,6 @@ enable-speedtest: true
 proxy: ""
 sub-store-port: ""
 sub-urls-remote: []
-sub-urls:
-  - __SUBSCRIPTION_URL__
+# 构建时不写入真实订阅地址，刷机后编辑此文件手动添加：
+# /opt/subs-check/data/config.yaml
+sub-urls: []
