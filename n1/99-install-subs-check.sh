@@ -22,7 +22,7 @@ proxy: ""
 sub-store-port: ""
 sub-urls-remote: []
 sub-urls:
-  - __REMOVED_SUBSCRIPTION_URL__
+  - __SUBSCRIPTION_URL__
 YAML
 cat > /etc/init.d/subs-check <<'INIT'
 #!/bin/sh /etc/rc.common
