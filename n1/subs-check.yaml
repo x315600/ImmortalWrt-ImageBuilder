@@ -1,0 +1,8 @@
+api-key: "subscheck-8199"
+check-interval: 1440
+enable-speedtest: true
+proxy: ""
+sub-store-port: ""
+sub-urls-remote: []
+sub-urls:
+  - __REMOVED_SUBSCRIPTION_URL__

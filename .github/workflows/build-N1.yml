@@ -216,7 +216,22 @@ jobs:
         if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}
         run: |
           cp n1/99-n1-bypass-router.sh files/etc/uci-defaults/
-      
+          cp n1/99-install-subs-check.sh files/etc/uci-defaults/
+          chmod +x files/etc/uci-defaults/99-install-subs-check.sh
+
+      - name: Bundle subs-check ARM64 binary and config
+        if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}
+        run: |
+          set -e
+          mkdir -p files/opt/subs-check/data
+          curl --fail --location --retry 3 --connect-timeout 15 \
+            -o /tmp/subs-check.tar.gz \
+            https://github.com/beck-8/subs-check/releases/download/v1.4.9/subs-check_Linux_aarch64.tar.gz
+          tar -xzf /tmp/subs-check.tar.gz -C files/opt/subs-check
+          chmod 0755 files/opt/subs-check/subs-check
+          cp n1/subs-check.yaml files/opt/subs-check/data/config.yaml
+          sha256sum files/opt/subs-check/subs-check
+
       - name: Building N1 ImmortalWrt rootfs 24.10.x
         if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}
         run: |
@@ -235,6 +250,7 @@ jobs:
               --user root \
               -v "${{ github.workspace }}/bin:/home/build/immortalwrt/bin" \
               -v "${{ github.workspace }}/files/etc/uci-defaults:/home/build/immortalwrt/files/etc/uci-defaults" \
+              -v "${{ github.workspace }}/files/opt:/home/build/immortalwrt/files/opt" \
               -v "${{ github.workspace }}/arch/arch.conf:/home/build/immortalwrt/files/etc/opkg/arch.conf" \
               -v "${{ github.workspace }}/shell:/home/build/immortalwrt/shell" \
               -v "${{ github.workspace }}/n1/banner:/home/build/immortalwrt/files/mnt/banner" \
