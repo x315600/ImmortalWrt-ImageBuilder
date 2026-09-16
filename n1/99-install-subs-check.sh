@@ -18,9 +18,6 @@ fi
 api-key: "subscheck-8199"
 check-interval: 1440
 enable-speedtest: true
-# 脱敏节点名称：按 IP 地理信息重命名，不保留原始机场名称
-rename-node: true
-node-prefix: "节点-"
 proxy: ""
 sub-store-port: ""
 sub-urls-remote: []
