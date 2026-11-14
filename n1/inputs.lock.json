@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "nikki_bundle": {
+    "version": "v1.26.2",
+    "filename": "nikki-v1.26.2.tar.gz",
+    "url": "https://github.com/nikkinikki-org/OpenWrt-nikki/releases/download/v1.26.2/nikki_aarch64_generic-openwrt-24.10.tar.gz",
+    "sha256": "e8dc83d05c31e03fd6f022e33ce778a7529011956fffedc1be06ed290dfaa7b9"
+  },
+  "nikki_key": {
+    "filename": "nikki-key-build.pub",
+    "url": "https://nikkinikki.pages.dev/key-build.pub",
+    "sha256": "121ce5486b48bb6e3cf0fbca05700ff98d004b55dbfb5f38a3402eda5f781191"
+  },
+  "nikki_packages": {
+    "nikki": "2026.10.10-r1",
+    "luci-app-nikki": "1.26.2-r1",
+    "luci-i18n-nikki-zh-cn": "26.283.34061~31339d5",
+    "mihomo-meta": "1.19.32"
+  },
+  "subs_check": {
+    "version": "v1.4.9",
+    "filename": "subs-check-v1.4.9.tar.gz",
+    "url": "https://github.com/beck-8/subs-check/releases/download/v1.4.9/subs-check_Linux_aarch64.tar.gz",
+    "sha256": "7fa9ddf5c5c6b67729caf1f35d5bb398348c594928244b51c47a65369b5ddfef"
+  },
+  "openclash": {
+    "version": "0.48.002",
+    "filename": "luci-app-openclash_0.48.002_all.ipk",
+    "url": "https://github.com/vernesong/OpenClash/releases/download/v0.48.002/luci-app-openclash_0.48.002_all.ipk",
+    "sha256": "f3f0d0514553aea8d542c62dc52ac26d1f79dbda24204280f1cb8ea7fff71e9e"
+  },
+  "openclash_core": {
+    "version": "1.19.32",
+    "filename": "mihomo-linux-arm64-v1.19.32.gz",
+    "url": "https://github.com/MetaCubeX/mihomo/releases/download/v1.19.32/mihomo-linux-arm64-v1.19.32.gz",
+    "sha256": "9dd862e28b46ff7d775f169cceebc28deccaa0a9e804237d421cd2571e0caba0",
+    "destination": "/etc/openclash/core/clash_meta",
+    "note": "Independent regular file; never linked to Nikki /usr/bin/mihomo or /usr/libexec/mihomo."
+  },
+  "store": {
+    "url": "https://github.com/wukongdaily/store.git",
+    "commit": "7d68c85c1236d9482b867737eaff425d224b2e79",
+    "note": "Git commit/content-addressed objects pin run/arm64 inputs; SHA256 of every staged file is recorded before extraction. Store UI is optional, but this repository also supplies the retained PassWall/MosDNS/Lucky/Bandix/Amlogic packages."
+  },
+  "reproducibility_gaps": [
+    "ImmortalWrt and third-party dependency feeds are resolved at build time, then their indexes and cached IPKs are hashed and validated; they are not pre-locked here.",
+    "Store run/arm64 is pinned by Git commit; its extracted package hashes are recorded, but runtime scripts and transitive feed dependencies are not exhaustively pre-locked.",
+    "Docker tag is resolved to an image ID per build and recorded; packaging action/kernel/prebuilt-rootfs inputs are not fully pre-locked.",
+    "This is an auditable input manifest, not a claim of bit-for-bit reproducibility."
+  ]
+}

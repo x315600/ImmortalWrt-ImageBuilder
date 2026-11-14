@@ -5,6 +5,8 @@
 # Docker: put docker0 into lan firewall zone directly, no separate docker zone.
 # This script runs on first boot from /etc/uci-defaults/ after 99-custom.sh.
 
+[ -z "${IPKG_INSTROOT:-}" ] || exit 1
+set -eu
 LOGFILE="/etc/config/uci-defaults-log.txt"
 echo "Configuring Phicomm N1 bypass router mode at $(date)" >> "$LOGFILE"
 
@@ -26,16 +28,28 @@ uci set network.lan6.device='@lan'
 uci set network.lan6.proto='dhcpv6'
 uci set network.lan6.reqaddress='try'
 uci set network.lan6.reqprefix='auto'
-uci set network.lan6.peerdns='1'
+uci set network.lan6.peerdns='0'
+uci set network.lan6.disabled='0'
+# Public IPv6 follows upstream RA/DHCPv6; never retain an old static prefix.
+uci -q delete network.lan.ip6addr || true
+uci -q delete network.lan.ip6gw || true
 uci commit network
 
 # Disable DHCP server on N1. Main router should keep serving DHCP.
 uci set dhcp.lan.ignore='1'
 uci set dhcp.lan.dynamicdhcp='0'
+uci set dhcp.lan.ra='disabled'
+uci set dhcp.lan.dhcpv6='disabled'
+uci set dhcp.lan.ndp='disabled'
+# Router bootstrap DNS is explicitly the IPv4 main router. It must not forward
+# back here. Client DNS belongs to Nikki only once private subscriptions are set.
+uci set dhcp.@dnsmasq[0].noresolv='1'
+uci -q delete dhcp.@dnsmasq[0].server || true
+uci add_list dhcp.@dnsmasq[0].server="$MAIN_ROUTER"
 uci commit dhcp
 
 # Remove any separate docker zone/forwarding created by common defaults.
-uci -q delete firewall.docker
+uci -q delete firewall.docker || true
 for idx in $(uci show firewall | grep '=forwarding' | cut -d[ -f2 | cut -d] -f1 | sort -rn); do
     src=$(uci -q get firewall.@forwarding[$idx].src)
     dest=$(uci -q get firewall.@forwarding[$idx].dest)
@@ -63,63 +77,39 @@ fi
 uci set "$LAN_ZONE.input"='ACCEPT'
 uci set "$LAN_ZONE.output"='ACCEPT'
 uci set "$LAN_ZONE.forward"='ACCEPT'
-uci -q delete "$LAN_ZONE.network"
+uci -q delete "$LAN_ZONE.network" || true
 uci add_list "$LAN_ZONE.network"='lan'
-uci -q delete "$LAN_ZONE.device"
+uci -q delete "$LAN_ZONE.device" || true
 uci add_list "$LAN_ZONE.device"='br-lan'
 uci add_list "$LAN_ZONE.device"='docker0'
 uci commit firewall
 
 
-# Preload frpc configuration only. Do not auto-start frpc.
-#
-# A preserved UCI state may contain old anonymous or named proxy sections.
-# Remove them first so stale proxies are not rendered together with the
-# definitions below and registered with duplicate names/remote ports at frps.
-while uci -q delete frpc.@conf[0]; do :; done
-for section in $(uci show frpc 2>/dev/null | sed -n 's/^frpc\.\([^=]*\)=conf$/\1/p'); do
-    uci -q delete "frpc.$section"
-done
-
-uci set frpc.common='conf'
-uci set frpc.common.server_addr='38.14.'
-uci set frpc.common.server_port='7000'
-uci set frpc.common.token='315600'
-uci set frpc.common.protocol='tcp'
-uci set frpc.common.log_level='warn'
-
-# Explicit names avoid relying on section-name conversion. frpc connects to
-# uhttpd at local port 80; it does not bind that local port itself.
-uci set frpc.n1_web='conf'
-uci set frpc.n1_web.name='n1_web'
-uci set frpc.n1_web.type='http'
-uci set frpc.n1_web.local_ip='127.0.0.1'
-uci set frpc.n1_web.local_port='80'
-uci set frpc.n1_web.custom_domains='ys.315600.xyz'
-
+# Keep FRPC package optional to configure and never bake shared endpoint credentials.
+uci -q delete frpc.common || true
+uci -q delete frpc.n1_web || true
 uci commit frpc
-
-# Keep frpc disabled by default; user can start it manually from LuCI or SSH.
 /etc/init.d/frpc disable 2>/dev/null || true
 /etc/init.d/frpc stop 2>/dev/null || true
 
+# Nikki policy is applied by zzz-n1-nikki.sh AFTER the vendor 99_init_nikki.
+
 # Reduce noisy logs for optional services.
-uci -q set mosdns.config.log_level='error'
-uci -q commit mosdns
-uci -q set bandix.general.log_level='error'
-uci -q commit bandix
+uci -q set mosdns.config.log_level='error' && uci -q commit mosdns || true
+uci -q set bandix.general.log_level='error' && uci -q commit bandix || true
 
 # Keep WebUI/SSH reachable on all interfaces.
-uci -q delete ttyd.@ttyd[0].interface
+uci -q delete ttyd.@ttyd[0].interface || true
 uci set dropbear.@dropbear[0].Interface=''
 uci commit ttyd
 uci commit dropbear
 
 echo "N1 bypass router mode done: LAN=$LAN_IP gateway=$MAIN_ROUTER dns=$MAIN_ROUTER IPv6=lan6 DHCP=disabled firewall_lan=br-lan,docker0 frpc=config-only" >> "$LOGFILE"
 
+# Configure amlogic only when installed; this used to be after an early exit.
+if uci -q get amlogic.config >/dev/null 2>&1; then
+    uci set amlogic.config.amlogic_firmware_repo='https://github.com/x315600/ImmortalWrt-ImageBuilder'
+    uci set amlogic.config.amlogic_kernel_path='tree/master/n1'
+    uci commit amlogic
+fi
 exit 0
-
-# Configure amlogic (晶晨宝盒) firmware repository.
-uci set amlogic.config.amlogic_firmware_repo='https://github.com/x315600/ImmortalWrt-ImageBuilder'
-uci set amlogic.config.amlogic_kernel_path='tree/master/n1'
-uci commit amlogic

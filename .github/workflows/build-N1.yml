@@ -145,6 +145,14 @@ on:
           - 6.12.62
           - 6.12.65
           
+      include_openclash:
+        description: 'OpenClash 0.48.002 + 独立 Mihomo 1.19.32（首启停用）'
+        required: true
+        default: 'yes'
+        type: choice
+        options:
+          - 'yes'
+          - 'no'
       include_docker:
         description: |
           是否编译 Docker 插件
@@ -215,22 +223,30 @@ jobs:
       - name: Configure N1 bypass router defaults
         if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}
         run: |
-          cp n1/99-n1-bypass-router.sh files/etc/uci-defaults/
-          cp n1/99-install-subs-check.sh files/etc/uci-defaults/
-          chmod +x files/etc/uci-defaults/99-install-subs-check.sh
+          set -euo pipefail
+          install -d files/etc/uci-defaults files/etc/nikki/profiles
+          install -m 0755 n1/99-n1-bypass-router.sh files/etc/uci-defaults/
+          install -m 0755 n1/99-install-subs-check.sh files/etc/uci-defaults/
+          install -m 0755 n1/zzz-n1-nikki.sh files/etc/uci-defaults/
+          install -m 0600 n1/nikki-dual.yaml files/etc/nikki/profiles/nikki-dual.yaml
+          # N1-only clean FRP config: never change or mount the shared credentialed file.
+          install -d .build/n1-overlay/etc/config
+          install -m 0600 n1/frpc.config .build/n1-overlay/etc/config/frpc
 
-      - name: Bundle subs-check ARM64 binary and config
+      - name: Stage locked and signature-verified ARM64 inputs
         if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}
+        env:
+          INCLUDE_OPENCLASH: ${{ inputs.include_openclash }}
         run: |
-          set -e
-          mkdir -p files/opt/subs-check/data
-          curl --fail --location --retry 3 --connect-timeout 15 \
-            -o /tmp/subs-check.tar.gz \
-            https://github.com/beck-8/subs-check/releases/download/v1.4.9/subs-check_Linux_aarch64.tar.gz
-          tar -xzf /tmp/subs-check.tar.gz -C files/opt/subs-check
-          chmod 0755 files/opt/subs-check/subs-check
-          # 故意不注入真实订阅地址；刷机后由用户手动配置。
-          sha256sum files/opt/subs-check/subs-check
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y python3-cryptography python3-yaml ripgrep
+          /usr/bin/python3 n1/prepare-inputs.py --include-openclash "$INCLUDE_OPENCLASH"
+          NIKKI_OFFICIAL_ROOT="$PWD/.build/n1-inputs/official-root" /usr/bin/python3 n1/tests/test_firstboot.py
+          mkdir -p files/etc/openclash files/opt bin/n1-audit
+          cp n1/inputs.lock.json bin/n1-audit/
+          cp .build/n1-inputs/inputs-manifest.json bin/n1-audit/
+          git rev-parse HEAD > bin/n1-audit/source-commit.txt
 
       - name: Building N1 ImmortalWrt rootfs 24.10.x
         if: ${{ github.event.inputs.skip_imagebuilder != 'true' }}
@@ -238,9 +254,20 @@ jobs:
           echo "✅ 使用 ImageBuilder 构建 rootfs"
           profiles="generic"
           include_docker="${{ github.event.inputs.include_docker }}"
+          include_openclash="${{ github.event.inputs.include_openclash }}"
+          enable_store="${{ github.event.inputs.enable_store }}"
           rootfs_partsize="${{ github.event.inputs.rootfs_partsize }}"
           luci_version="${{ github.event.inputs.luci_version }}"
           
+          set -euo pipefail
+          image="immortalwrt/imagebuilder:armsr-armv8-openwrt-${luci_version}"
+          docker pull "$image"
+          image_id=$(docker image inspect --format '{{.Id}}' "$image")
+          docker image inspect "$image_id" > bin/n1-audit/docker-image.json
+          printf '%s\n' "$image_id" > bin/n1-audit/docker-image-id.txt
+          printf 'luci=%s\nkernel=%s\nopenclash=%s\ndocker=%s\nstore=%s\n' \
+            "$luci_version" '${{ inputs.openwrt_kernel }}' "$include_openclash" "$include_docker" "$enable_store" \
+            > bin/n1-audit/build-options.txt
           IFS=',' read -r -a profile_array <<< "$profiles"
           
           for profile in "${profile_array[@]}"; do
@@ -251,6 +278,11 @@ jobs:
               -v "${{ github.workspace }}/bin:/home/build/immortalwrt/bin" \
               -v "${{ github.workspace }}/files/etc/uci-defaults:/home/build/immortalwrt/files/etc/uci-defaults" \
               -v "${{ github.workspace }}/files/opt:/home/build/immortalwrt/files/opt" \
+              -v "${{ github.workspace }}/.build/n1-inputs:/home/build/immortalwrt/n1-inputs:ro" \
+              -v "${{ github.workspace }}/n1:/home/build/immortalwrt/n1:ro" \
+              -v "${{ github.workspace }}/files/etc/openclash:/home/build/immortalwrt/files/etc/openclash" \
+              -v "${{ github.workspace }}/files/etc/nikki:/home/build/immortalwrt/files/etc/nikki" \
+              -v "${{ github.workspace }}/.build/n1-overlay/etc/config/frpc:/home/build/immortalwrt/files/etc/config/frpc:ro" \
               -v "${{ github.workspace }}/arch/arch.conf:/home/build/immortalwrt/files/etc/opkg/arch.conf" \
               -v "${{ github.workspace }}/shell:/home/build/immortalwrt/shell" \
               -v "${{ github.workspace }}/n1/banner:/home/build/immortalwrt/files/mnt/banner" \
@@ -258,8 +290,10 @@ jobs:
               -v "${{ github.workspace }}/n1/build.sh:/home/build/immortalwrt/build.sh" \
               -e PROFILE=$profile \
               -e INCLUDE_DOCKER=$include_docker \
+              -e INCLUDE_OPENCLASH=$include_openclash \
+              -e ENABLE_STORE=$enable_store \
               -e ROOTFS_PARTSIZE=$rootfs_partsize \
-              immortalwrt/imagebuilder:armsr-armv8-openwrt-${luci_version} /bin/bash /home/build/immortalwrt/build.sh
+              "$image_id" /bin/bash -ec 'command -v rg >/dev/null || { apt-get update && apt-get install -y ripgrep; }; exec /bin/bash /home/build/immortalwrt/build.sh'
           done
           
       - name: Download prebuilt rootfs.tar.gz
@@ -309,13 +343,36 @@ jobs:
           fi
 
 
+      - name: Generate final image checksums and audit archive
+        env:
+          OUTPUT_DIR: ${{ env.PACKAGED_OUTPUTPATH }}
+        run: |
+          set -euo pipefail
+          mkdir -p bin/n1-audit
+          python3 n1/build-audit.py final --root "$OUTPUT_DIR" --output bin/n1-audit
+          cp bin/n1-audit/SHA256SUMS "$OUTPUT_DIR/SHA256SUMS"
+          python3 n1/release-info.py --skip-imagebuilder '${{ inputs.skip_imagebuilder }}'
+          cp bin/n1-audit/BUILD-INFO.md "$OUTPUT_DIR/BUILD-INFO.md"
+          tar -czf "$OUTPUT_DIR/n1-build-audit.tar.gz" -C bin n1-audit
+
+      - name: Upload build audit even on failure
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: n1-build-audit
+          path: bin/n1-audit/
+          if-no-files-found: warn
+
       - name: Upload firmware to GitHub Releases
         uses: softprops/action-gh-release@v3
         with:
           tag_name: phicomm-n1
           name: ImmortalWrt for Phicomm N1
-          body_path: ${{ github.workspace }}/n1/info.md
+          body_path: ${{ github.workspace }}/bin/n1-audit/release-notes.md
           files: |
             ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz
+            ${{ env.PACKAGED_OUTPUTPATH }}/SHA256SUMS
+            ${{ env.PACKAGED_OUTPUTPATH }}/n1-build-audit.tar.gz
+            ${{ env.PACKAGED_OUTPUTPATH }}/BUILD-INFO.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

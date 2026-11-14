@@ -1,4 +1,10 @@
 #!/bin/bash
+set -eo pipefail
+cd /home/build/immortalwrt
+CUSTOM_PACKAGES="${CUSTOM_PACKAGES:-}"
+INCLUDE_OPENCLASH="${INCLUDE_OPENCLASH:-yes}"
+ENABLE_STORE="${ENABLE_STORE:-true}"
+export INCLUDE_OPENCLASH ENABLE_STORE
 # Log file for debugging
 source shell/custom-packages.sh
 source shell/switch_repository.sh
@@ -37,12 +43,14 @@ PACKAGES="$PACKAGES perlbase-base perlbase-file perlbase-time perlbase-utf8 perl
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-amlogic luci-i18n-amlogic-zh-cn"
 
 # N1 自定义插件
-# PassWall
+# Keep all original plugins; only first-boot scripts control service enablement.
+# PassWall and MosDNS remain installed but are disabled by N1 first-boot defaults.
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES geoview xray-core sing-box hysteria luci-i18n-passwall-zh-cn"
-# MosDNS
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-mosdns luci-i18n-mosdns-zh-cn"
-# OpenClash（下方会自动补充 core / GeoIP / GeoSite）
-CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-openclash luci-compat kmod-tun kmod-inet-diag kmod-nft-tproxy bash curl ip-full unzip"
+# OpenClash 0.48.002 + independent official Mihomo 1.19.32 file.
+if [ "$INCLUDE_OPENCLASH" = "yes" ]; then
+    CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-openclash luci-compat kmod-tun kmod-inet-diag kmod-nft-tproxy bash curl ip-full unzip"
+fi
 # Lucky
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-lucky lucky"
 # Frp client
@@ -54,84 +62,52 @@ CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-bandix luci-i18n-bandix-zh-cn"
 # OpenList WebDAV
 CUSTOM_PACKAGES="$CUSTOM_PACKAGES openlist luci-i18n-openlist-zh-cn"
 
-echo "🔄 正在同步第三方软件仓库 Cloning run file repo..."
-git clone --depth=1 https://github.com/wukongdaily/store.git /tmp/store-run-repo
-# 拷贝 run/arm64 下所有 run 文件和ipk文件 到 extra-packages 目录
-mkdir -p /home/build/immortalwrt/extra-packages
-cp -r /tmp/store-run-repo/run/arm64/* /home/build/immortalwrt/extra-packages/
-echo "✅ Run files copied to extra-packages:"
-ls -lh /home/build/immortalwrt/extra-packages/*.run
-# 解压并拷贝ipk到packages目录
+mkdir -p bin/n1-audit
+# This package repository supplies PassWall/MosDNS/Lucky/Bandix/Amlogic too.
+# Disabling the Store UI must not silently remove these original plugins.
+STORE_COMMIT=$(python3 -c 'import json; print(json.load(open("n1/inputs.lock.json"))["store"]["commit"])')
+git init /tmp/store-run-repo
+git -C /tmp/store-run-repo remote add origin https://github.com/wukongdaily/store.git
+git -C /tmp/store-run-repo fetch --depth=1 origin "$STORE_COMMIT"
+git -C /tmp/store-run-repo checkout --detach FETCH_HEAD
+test "$(git -C /tmp/store-run-repo rev-parse HEAD)" = "$STORE_COMMIT"
+printf '%s\n' "$STORE_COMMIT" > bin/n1-audit/store-commit.txt
+mkdir -p extra-packages
+cp -r /tmp/store-run-repo/run/arm64/. extra-packages/
+python3 n1/build-audit.py before
 sh shell/prepare-packages.sh
-ls -lah /home/build/immortalwrt/packages/
-# 添加架构优先级信息
-sed -i '1i\
-arch aarch64_generic 10\n\
-arch aarch64_cortex-a53 15' repositories.conf
-
-# ======== shell/custom-packages.sh =======
-# 合并imm仓库以外的第三方插件
-PACKAGES="$PACKAGES $CUSTOM_PACKAGES"
-
-# 若构建openclash 则添加内核
-if echo "$PACKAGES" | grep -q "luci-app-openclash"; then
-    echo "✅ 已选择 luci-app-openclash，添加 openclash core"
-    mkdir -p files/etc/openclash/core
-    # Download clash_meta
-    META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-arm64.tar.gz"
-    wget -qO- $META_URL | tar xOvz > files/etc/openclash/core/clash_meta
-    chmod +x files/etc/openclash/core/clash_meta
-    # Download GeoIP and GeoSite
-    wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat -O files/etc/openclash/GeoIP.dat
-    wget -q https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat -O files/etc/openclash/GeoSite.dat
-    # Download latest openclash Client
-    URL=$(curl -s https://api.github.com/repos/vernesong/OpenClash/releases/latest \
-      | grep "browser_download_url.*ipk" \
-      | head -n1 \
-      | cut -d '"' -f 4)
-    echo "OpenClash latest ipk: $URL"
-    wget "$URL" -P /home/build/immortalwrt/packages/
-else
-    echo "⚪️ 未选择 luci-app-openclash"
+# Only install verified official IPKs through ImageBuilder's local packages/.
+# make image -> package_reload -> package_index builds/signs this local index
+# and invokes its own target-root opkg. Never run the Ubuntu host's opkg.
+python3 n1/configure-builder.py
+PACKAGES="$PACKAGES $CUSTOM_PACKAGES mihomo-meta"
+if [ "$INCLUDE_OPENCLASH" != "yes" ]; then
+    PACKAGES="$PACKAGES -luci-app-openclash"
 fi
-
-# Nikki uses the shared /usr/bin/mihomo core. Keep it aligned with the
-# OpenClash Meta core because the stable package core may not support the
-# XHTTP + Reality nodes used by the default subscription profile.
-if echo "$CUSTOM_PACKAGES" | grep -q "nikki"; then
-    echo "✅ 已选择 nikki，添加兼容 XHTTP/Reality 的 mihomo core"
-    mkdir -p files/usr/bin
-    NIKKI_MIHOMO_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-arm64.tar.gz"
-    wget -qO- "$NIKKI_MIHOMO_URL" | tar xOvz > files/usr/bin/mihomo
-    chmod +x files/usr/bin/mihomo
-    echo "✅ 已下载 Nikki mihomo core"
-    files/usr/bin/mihomo -v || true
-fi
-
-if echo "$PACKAGES" | grep -q "luci-app-ssr-plus"; then
-    echo "✅ 已选择 luci-app-ssr-plus，添加 mihomo core"
-    mkdir -p files/usr/bin
-    # Download mihomo
-    MIHOMO_URL="https://github.com/MetaCubeX/mihomo/releases/download/v1.19.24/mihomo-linux-arm64-v1.19.24.gz"
-    mkdir -p files/usr/bin
-    wget -qO- "$MIHOMO_URL" | gzip -dc > files/usr/bin/mihomo
-    chmod +x files/usr/bin/mihomo
-    echo "✅ 已下载 mihomo core"
-    ls -lah files/usr/bin
-else
-    echo "⚪️ 未选择 luci-app-ssr-plus"
-fi
-
+# Pass explicit IPK paths first: opkg's local-file install pins provenance,
+# unlike a bare package name which can resolve to a newer remote feed.
+FILTERED_PACKAGES=""
+for package in $PACKAGES; do
+    case "$package" in
+        nikki|luci-app-nikki|luci-i18n-nikki-zh-cn|mihomo-meta|mihomo-alpha|luci-app-openclash) ;;
+        *) FILTERED_PACKAGES="$FILTERED_PACKAGES $package" ;;
+    esac
+done
+PACKAGES="$(cat bin/n1-audit/pinned-package-paths.txt) $FILTERED_PACKAGES"
+printf '%s\n' "$PACKAGES" > bin/n1-audit/requested-packages.txt
+# Freeze this run's resolved indexes before installation. ImageBuilder owns
+# target opkg/cache/key handling. Its image recipe clears MAKEFLAGS, so use
+# a guarded target override, not make -o, to prevent a second feed refresh.
+make -s _check_keys
+make package_reload
+python3 n1/build-audit.py before
+python3 n1/freeze-feeds.py
 
 # 构建镜像
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Building image with the following packages:"
 echo "$PACKAGES"
 
-make image PROFILE=$PROFILE PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files" ROOTFS_PARTSIZE=$ROOTFS_PARTSIZE
-
-if [ $? -ne 0 ]; then
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Build failed!"
-    exit 1
-fi
+make image PROFILE="$PROFILE" PACKAGES="$PACKAGES" FILES="/home/build/immortalwrt/files" ROOTFS_PARTSIZE="$ROOTFS_PARTSIZE"
+python3 n1/build-audit.py after
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Build completed successfully."

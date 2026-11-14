@@ -1,7 +1,7 @@
 #!/bin/sh
 # Install subs-check on first boot for Phicomm N1.
 # The service runs as nobody (UID/GID 65534), which Nikki bypasses.
-set -u
+set -eu
 LOG=/etc/config/subs-check-install.log
 BIN=/opt/subs-check/subs-check
 DATA=/opt/subs-check/data
@@ -10,6 +10,7 @@ mkdir -p /opt/subs-check "$DATA"
 if [ ! -x "$BIN" ]; then
   TMP=/tmp/subs-check.tar.gz
   if command -v curl >/dev/null 2>&1; then curl -fsSL --noproxy '*' "$URL" -o "$TMP"; else wget -O "$TMP" "$URL"; fi
+  echo "7fa9ddf5c5c6b67729caf1f35d5bb398348c594928244b51c47a65369b5ddfef  $TMP" | sha256sum -c -
   tar -xzf "$TMP" -C /opt/subs-check
   chmod 755 "$BIN"
   rm -f "$TMP"
