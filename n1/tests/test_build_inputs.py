@@ -79,10 +79,25 @@ def main():
             assert len(list((builder / 'packages').glob('*.ipk'))) == (5 if mode == 'yes' else 4)
             assert not (builder / 'files/usr/bin/mihomo').exists()
             run('build-audit.py', 'before', cwd=builder, env=env)
-            # Only the package_reload override is tested by this minimal Make fixture.
-            (builder / 'Makefile').write_text('TOPDIR := .\npackage_reload:\n\t@echo original\n')
+            # Match ImageBuilder's _call_image: clean rootfs, reload indexes,
+            # then install packages. The frozen target must recreate rootfs/tmp.
+            (builder / 'Makefile').write_text(
+                'TOPDIR := .\nTARGET_DIR := rootfs\nTMP_DIR := build-tmp\n'
+                '.PHONY: image package_install\nimage:\n'
+                '\trm -rf "$(TARGET_DIR)" "$(TMP_DIR)"\n'
+                '\tmkdir -p "$(TARGET_DIR)"\n'
+                '\t$(MAKE) package_reload\n\t$(MAKE) package_install\n'
+                'package_reload:\n\t@mkdir -p "$(TARGET_DIR)/tmp"\n'
+                'package_install:\n\t@test -d "$(TARGET_DIR)/tmp"\n'
+                '\t@touch "$(TARGET_DIR)/tmp/opkg.lock"\n')
             run('freeze-feeds.py', cwd=builder, env=env)
             assert (builder / 'Makefile').read_text().count('\npackage_reload:\n') == 1
+            make = subprocess.run(['make', 'image'], cwd=builder, env=env,
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            assert make.returncode == 0, 'Frozen reload lost rootfs tmp initialization'
+            assert (builder / 'rootfs/tmp/opkg.lock').is_file()
+            assert (builder / 'build-tmp').is_dir()
+            checks.append('clean-rootfs/reload/opkg-lock: OpenClash=' + mode)
             checks.append('prepare/configure/freeze: OpenClash=' + mode)
             if mode == 'yes':
                 staged = builder / 'files/etc/openclash/core/clash_meta'

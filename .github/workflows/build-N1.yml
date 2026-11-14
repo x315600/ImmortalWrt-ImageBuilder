@@ -242,6 +242,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-cryptography python3-yaml ripgrep
           /usr/bin/python3 n1/prepare-inputs.py --include-openclash "$INCLUDE_OPENCLASH"
+          /usr/bin/python3 n1/tests/test_freeze_reload.py
           NIKKI_OFFICIAL_ROOT="$PWD/.build/n1-inputs/official-root" /usr/bin/python3 n1/tests/test_firstboot.py
           mkdir -p files/etc/openclash files/opt bin/n1-audit
           cp n1/inputs.lock.json bin/n1-audit/

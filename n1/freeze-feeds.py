@@ -30,6 +30,6 @@ shutil.copyfile(makefile, audit / 'ImageBuilder.Makefile.original')
 # make image explicitly clears MAKEFLAGS, so make -o would NOT propagate.
 # Rename only this target; all native package_index/package_install code stays intact.
 text = text.replace(marker, 'n1_package_reload_unfrozen:\n', 1)
-text += '\n# N1: indexes were loaded and recorded before installation.\npackage_reload:\n\t@test -s $(TOPDIR)/bin/n1-audit/before-manifest.json\n'
+text += '\n# N1: indexes were loaded and recorded before installation.\npackage_reload:\n\t@test -s $(TOPDIR)/bin/n1-audit/before-manifest.json\n\t@mkdir -p "$(TARGET_DIR)/tmp" "$(TMP_DIR)"\n'
 makefile.write_text(text)
 print('Frozen native ImageBuilder feed indexes for this build')
